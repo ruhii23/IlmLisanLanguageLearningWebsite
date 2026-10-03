@@ -3,6 +3,7 @@ name: Deploy Next.js site to Pages
 on:
   push:
     branches: ["main"]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -28,16 +29,18 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
+      - name: Install Dependencies & Build
+        run: |
+          if [ -d "imlisan" ]; then
+            cd imlisan
+          fi
+          npm install
+          npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out
+          path: ${{ hashFiles('imlisan/out/**') != '' && './imlisan/out' || './out' }}
 
       - name: Deploy to GitHub Pages
         id: deployment
